@@ -1,7 +1,7 @@
 package quiz.paiza.a.amida;
 
+import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
 	// あみだのsingleton
 	Amidakuji amidakuji = Amidakuji.getAmidakuji();
-	Map<String, String> map = new HashMap<String, String>();
+	Map<IntBuffer, IntBuffer> map = new HashMap<IntBuffer, IntBuffer>();
 
 	Scanner sc = new Scanner(System.in);
 
@@ -34,8 +34,11 @@ public class Main {
 
 	    int[] tmp1 = { orgLine - 1, orgPoint - 1 };
 	    int[] tmp2 = { orgLine, dstPoint - 1 };
-	    map.put(Arrays.toString(tmp1), Arrays.toString(tmp2));
-	    map.put(Arrays.toString(tmp2), Arrays.toString(tmp1));
+	    IntBuffer ib1 = IntBuffer.wrap(tmp1);
+	    IntBuffer ib2 = IntBuffer.wrap(tmp2);
+
+	    map.put(ib1, ib2);
+	    map.put(ib2, ib1);
 	}
 
 	// for (int j = 0; j < length - 1; j++) {
@@ -56,11 +59,9 @@ public class Main {
 	    flag: for (int i = startPoint; i < length - 1; i++) {
 		if (!amidakuji.getMapping().get(searchLineNum).get(i).equals("0")) {
 		    int[] tmp3 = { searchLineNum, length - i - 2 };
-		    searchLineNum = Integer.parseInt(map.get(Arrays.toString(tmp3)).split(",", 0)[0].replace("[", ""));
-		    startPoint = length
-			    - Integer.parseInt(
-				    map.get(Arrays.toString(tmp3)).split(",", 0)[1].replace("]", "").replace(" ", ""))
-			    - 1;
+		    IntBuffer ib3 = IntBuffer.wrap(tmp3);
+		    searchLineNum = map.get(ib3).array()[0];
+		    startPoint = length - map.get(ib3).array()[1] - 1;
 		    break flag;
 		} else if (i == length - 2) {
 		    continueFlag = false;
