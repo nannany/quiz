@@ -1,10 +1,7 @@
 package quiz.paiza.a.amida;
 
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -30,10 +27,10 @@ public class Main {
 	    int orgPoint = sc.nextInt();
 	    int dstPoint = sc.nextInt();
 	    MakeAmida ma = new MakeAmida();
-	    ma.plotPoint(String.valueOf(i + 1), orgLine, orgPoint, dstPoint);
+	    ma.plotPoint(i + 1, orgLine, orgPoint, dstPoint);
 
-	    int[] tmp1 = { orgLine - 1, orgPoint - 1 };
-	    int[] tmp2 = { orgLine, dstPoint - 1 };
+	    int[] tmp1 = { orgLine, orgPoint };
+	    int[] tmp2 = { orgLine + 1, dstPoint };
 	    IntBuffer ib1 = IntBuffer.wrap(tmp1);
 	    IntBuffer ib2 = IntBuffer.wrap(tmp2);
 
@@ -41,29 +38,18 @@ public class Main {
 	    map.put(ib2, ib1);
 	}
 
-	// for (int j = 0; j < length - 1; j++) {
-	// for (int i = 0; i < num; i++) {
-	// System.out.print(amidakuji.getMapping().get(i).get(j) + " ");
-	// }
-	// System.out.println();
-	// }
-
-	for (int i = 0; i < num; i++) {
-	    Collections.reverse(amidakuji.getMapping().get(i));
-	}
-
 	int searchLineNum = 0;
-	int startPoint = 0;
+	int startPoint = length - 1;
 	boolean continueFlag = true;
-	while (startPoint != length && continueFlag) {
-	    flag: for (int i = startPoint; i < length - 1; i++) {
-		if (!amidakuji.getMapping().get(searchLineNum).get(i).equals("0")) {
-		    int[] tmp3 = { searchLineNum, length - i - 2 };
+	while (startPoint != 0 && continueFlag) {
+	    flag: for (int i = startPoint - 1; -1 < i; i--) {
+		if (amidakuji.getMapping()[searchLineNum][i] != 0) {
+		    int[] tmp3 = { searchLineNum + 1, i + 1 };
 		    IntBuffer ib3 = IntBuffer.wrap(tmp3);
-		    searchLineNum = map.get(ib3).array()[0];
-		    startPoint = length - map.get(ib3).array()[1] - 1;
+		    searchLineNum = map.get(ib3).array()[0] - 1;
+		    startPoint = map.get(ib3).array()[1] - 1;
 		    break flag;
-		} else if (i == length - 2) {
+		} else if (i == 0) {
 		    continueFlag = false;
 		}
 	    }
@@ -77,7 +63,15 @@ class Amidakuji {
 
     private static int num;
     private static int length;
-    private List<List<String>> mapping = new ArrayList<List<String>>();
+    private int[][] mapping;
+
+    public int[][] getMapping() {
+	return mapping;
+    }
+
+    public void setMapping(int[][] mapping) {
+	this.mapping = mapping;
+    }
 
     private Amidakuji() {
     }
@@ -87,13 +81,7 @@ class Amidakuji {
     }
 
     public void initialize() {
-	for (int i = 0; i < num; i++) {
-	    List<String> list = new ArrayList<String>();
-	    for (int j = 0; j < length - 1; j++) {
-		list.add("0");
-	    }
-	    mapping.add(list);
-	}
+	this.mapping = new int[num][length - 1];
     }
 
     public int getNum() {
@@ -112,20 +100,16 @@ class Amidakuji {
 	this.length = length;
     }
 
-    public List<List<String>> getMapping() {
-	return mapping;
-    }
-
-    public void setMapping(String mark, int line, int point) {
-	this.mapping.get(line - 1).set(point - 1, mark);
+    public void setMapping(int mark, int line, int point) {
+	this.mapping[line - 1][point - 1] = mark;
     }
 }
 
 class MakeAmida {
     Amidakuji amidakuji = Amidakuji.getAmidakuji();
 
-    public void plotPoint(String mark, int orgLine, int orgPoint, int dstPoint) {
-	amidakuji.setMapping(mark + "L", orgLine, orgPoint);
-	amidakuji.setMapping(mark + "R", orgLine + 1, dstPoint);
+    public void plotPoint(int mark, int orgLine, int orgPoint, int dstPoint) {
+	amidakuji.setMapping(mark, orgLine, orgPoint);
+	amidakuji.setMapping(mark, orgLine + 1, dstPoint);
     }
 }
