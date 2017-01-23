@@ -1,4 +1,4 @@
-package quiz.paiza.d.trump;
+package quiz.pQuiz.d.trump;
 
 import java.util.Scanner;
 import java.util.function.BiPredicate;
