@@ -12,14 +12,14 @@ public class Main {
 
 	StringBuilder sb = new StringBuilder();
 
-	BiConsumer<Integer,String> mojiCreator = (kazu,moji) -> {
-	    for(int i= 0;i<kazu;i++){
+	BiConsumer<Integer, String> mojiCreator = (kazu, moji) -> {
+	    for (int i = 0; i < kazu; i++) {
 		sb.append(moji);
 	    }
 	};
-	mojiCreator.accept(L,"A");
-	mojiCreator.accept(M,"B");
-	mojiCreator.accept(N,"A");
+	mojiCreator.accept(L, "A");
+	mojiCreator.accept(M, "B");
+	mojiCreator.accept(N, "A");
 
 	System.out.println(mojiCreator.toString());
     }
