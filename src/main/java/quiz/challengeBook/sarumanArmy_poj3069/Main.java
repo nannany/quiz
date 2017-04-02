@@ -22,15 +22,15 @@ public class Main {
 	    int include = 0;
 
 	    while (include < N) {
-		int tmpEnd = x[include] + R;
-		for (int i = include + 1; i < N; i++) {
-		    if (x[i] <= tmpEnd) {
-			include++;
-		    } else {
-			break;
-		    }
-		}
+		int s = x[include];
 		include++;
+		while (include < N && x[include] <= s + R) {
+		    include++;
+		}
+		int p = x[include - 1];
+		while (include < N && x[include] <= p + R) {
+		    include++;
+		}
 		count++;
 	    }
 	    System.out.println(count);
