@@ -20,7 +20,7 @@ public class MakePalindrome {
 	for (String str : strList2) {
 	    int count = 0;
 	    for (int i = 0; i < letters.length; i++) {
-		if (letters[i].equals("str")) {
+		if (letters[i].equals(str)) {
 		    count++;
 		}
 	    }
@@ -34,20 +34,37 @@ public class MakePalindrome {
 		ansCount++;
 	    }
 	}
-
-	String ans[] = new String[ansCount];
-
+	String tmp = "";
+	// 文字数が偶数のもののみで組み立てる
 	for (Letter letter : letterList) {
-	    String tmp = "";
-	    boolean flg = true;
 	    if (letter.count % 2 == 0) {
 		for (int i = 0; i < letter.count / 2; i++) {
 		    tmp = letter.str + tmp + letter.str;
 		}
-	    }else if(flg){
-		flg = false;
 	    }
 	}
+	if (ansCount == 0) {
+	    String[] ansOnlyEven = new String[1];
+	    ansOnlyEven[0] = tmp;
+	    return ansOnlyEven;
+	}
+	List<String> oddList = new ArrayList<String>();
+	for (Letter letter : letterList) {
+	    if (letter.count % 2 == 1) {
+		String tmpOdd = "";
+		for (int i = 0; i < letter.count; i++) {
+		    tmpOdd += letter.str;
+		}
+		oddList.add(tmpOdd);
+	    }
+	}
+	String ans = tmp.substring(0, tmp.length() / 2) + oddList.get(0) + tmp.substring(tmp.length() / 2);
+	String[] ansArray = new String[ansCount];
+	ansArray[0] = ans;
+	for (int i = 1; i < ansCount; i++) {
+	    ansArray[i] = oddList.get(i);
+	}
+	return ansArray;
     }
 
     static class Letter {
