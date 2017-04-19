@@ -1,6 +1,8 @@
 package quiz.challengeBook.agriNet_poj1258_kruskal;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -9,13 +11,32 @@ public class Main {
 	Scanner sc = new Scanner(System.in);
 	int N = sc.nextInt();
 	List<Edge> edges = new ArrayList<Edge>();
-	for(int i = 0;i<N;i++){
-	    for(int j = 0;j<N;j++){
-		Edge edge = new Edge(i,j,sc.nextInt());
+	for (int i = 0; i < N; i++) {
+	    for (int j = 0; j < N; j++) {
+		Edge edge = new Edge(i, j, sc.nextInt());
 		edges.add(edge);
 	    }
 	}
 
+	Collections.sort(edges, new Comparator<Edge>() {
+	    public int compare(Edge e1, Edge e2) {
+		return e1.cost - e2.cost;
+	    }
+	});
+	UnionFind uf = new UnionFind(N);
+	uf.init(N);
+
+	int ans = 0;
+	for (int i = 0; i < N * N; i++) {
+	    Edge edge = edges.get(i);
+	    if (!uf.same(edge.u, edge.v)) {
+		uf.unite(edge.u, edge.v);
+		ans += edge.cost;
+	    }
+	}
+
+	System.out.println(ans);
+	sc.close();
     }
 
     static class Edge {
