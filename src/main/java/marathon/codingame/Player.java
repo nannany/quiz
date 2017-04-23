@@ -1,7 +1,10 @@
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -11,11 +14,19 @@ import java.util.stream.Collectors;
  **/
 class Player {
 
+    // 0:なんもなし。1:地雷。2:ラム。
+    static int[][] allOverMap;
+
+    static int[][] oddOffset = { { 1, 0 }, { 1, -1 }, { 0, -1 }, { -1, 0 }, { 0, 1 }, { 1, 1 } };
+    static int[][] evenOffset = { { 1, 0 }, { 0, -1 }, { -1, -1 }, { -1, 0 }, { -1, 1 }, { 0, 1 } };
+
     public static void main(String args[]) {
 	Scanner in = new Scanner(System.in);
 
 	// game loop
 	while (true) {
+	    allOverMap = new int[23][21];
+	    Arrays.fill(allOverMap, 0);
 	    int myShipCount = in.nextInt(); // 自分の機体数
 	    int entityCount = in.nextInt();
 
@@ -59,6 +70,7 @@ class Player {
 		if (entityType[i].equals("BARREL")) {
 		    Barrel barrel = new Barrel(x[i], y[i], arg1[i]);
 		    barrelList.add(barrel);
+		    allOverMap[x[i]][y[i]] = 2;
 		}
 		if (entityType[i].equals("CANNONBALL")) {
 		    Cannonball cannonball = new Cannonball(x[i], y[i], arg1[i], arg2[i]);
@@ -67,27 +79,19 @@ class Player {
 		if (entityType[i].equals("MINE")) {
 		    Mine mine = new Mine(x[i], y[i]);
 		    mineList.add(mine);
-		}
-	    }
-	    int targetX = -1, targetY = -1;
-	    int distance = 1000000000;
-	    for (Barrel barrel : barrelList) {
-		int tmpDistance = Math.abs(x[myShipId] - barrel.x) + Math.abs(y[myShipId] - barrel.y);
-
-		if (tmpDistance < distance) {
-		    targetX = barrel.x;
-		    targetY = barrel.y;
-		    distance = tmpDistance;
+		    allOverMap[x[i]][y[i]] = 1;
 		}
 	    }
 
 	    for (MyShip myShip : myShipList) {
 		List<Barrel> nearBarrelList = getNearBarrel(myShip.x, myShip.y, barrelList);
+
 		System.out.println("MOVE " + nearBarrelList.get(0).x + " " + nearBarrelList.get(0).y);
 	    }
 	}
     }
 
+    // 地雷関係なく、近い順に並べ替えた。
     static List<Barrel> getNearBarrel(int x, int y, List<Barrel> barrelList) {
 	List<Barrel> retList = new ArrayList<Barrel>();
 	retList = barrelList.stream().sorted(new Comparator<Barrel>() {
@@ -98,6 +102,65 @@ class Player {
 	}).collect(Collectors.toList());
 
 	return retList;
+    }
+
+    // 地雷込で、近い順
+    static List<Coordinates> getBarrelBypass(Coordinates start, Coordinates goal) {
+	class Distance {
+	    int distance;
+	    Coordinates coordinates;
+
+	    Distance(int distance, Coordinates coordinates) {
+		this.distance = distance;
+		this.coordinates = coordinates;
+	    }
+	}
+	int[][] prev = new int[23][21];
+
+	int[][] d = new int[23][21];
+	Arrays.fill(d, Integer.MAX_VALUE);
+	d[start.x][start.y] = 0;
+
+	boolean[][] used = new boolean[23][21];
+	Arrays.fill(used, false);
+
+	Distance s = new Distance(0, start);
+	Queue<Distance> que = new LinkedList<Distance>();
+
+	que.add(s);
+	while (!que.isEmpty()) {
+	    Distance distance = que.poll();
+	    Coordinates coordinates = distance.coordinates;
+
+	    if (distance.coordinates.equals(goal)) {
+		break;
+	    }
+
+	    // 奇数行目で動く場合
+	    if (coordinates.y % 2 == 1) {
+		for (int i = 0; i < 6; i++) {
+		    int nextX = oddOffset[i][0] + coordinates.x;
+		    int nextY = oddOffset[i][1] + coordinates.y;
+		    if (!used[nextX][nextY] && 0 <= nextX && nextX < 23 && 0 <= nextY && nextY < 21) {
+			Distance tmpDis = new Distance(distance.distance++, new Coordinates(nextX, nextY));
+			d[nextX][nextY] = tmpDis.distance;
+			que.add(tmpDis);
+		    }
+		}
+		// 偶数行目で動く場合
+	    } else {
+		for (int i = 0; i < 6; i++) {
+		    int nextX = evenOffset[i][0] + coordinates.x;
+		    int nextY = evenOffset[i][1] + coordinates.y;
+		    if (!used[nextX][nextY] && 0 <= nextX && nextX < 23 && 0 <= nextY && nextY < 21) {
+			Distance tmpDis = new Distance(distance.distance++, new Coordinates(nextX, nextY));
+			d[nextX][nextY] = tmpDis.distance;
+			que.add(tmpDis);
+		    }
+		}
+	    }
+	}
+
     }
 
     static class MyShip extends Coordinates {
