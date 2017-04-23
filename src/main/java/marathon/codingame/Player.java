@@ -1,7 +1,9 @@
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * Auto-generated code below aims at helping you parse the standard input
@@ -79,10 +81,23 @@ class Player {
 		}
 	    }
 
-	    for (int i = 0; i < myShipCount; i++) {
-		System.out.println("MOVE " + targetX + " " + targetY);
+	    for (MyShip myShip : myShipList) {
+		List<Barrel> nearBarrelList = getNearBarrel(myShip.x, myShip.y, barrelList);
+		System.out.println("MOVE " + nearBarrelList.get(0).x + " " + nearBarrelList.get(0).y);
 	    }
 	}
+    }
+
+    static List<Barrel> getNearBarrel(int x, int y, List<Barrel> barrelList) {
+	List<Barrel> retList = new ArrayList<Barrel>();
+	retList = barrelList.stream().sorted(new Comparator<Barrel>() {
+	    public int compare(Barrel barrel1, Barrel barrel2) {
+		return (Math.abs(barrel1.x - x) + Math.abs(barrel1.y - y))
+			- (Math.abs(barrel2.x - x) + Math.abs(barrel2.y - y));
+	    }
+	}).collect(Collectors.toList());
+
+	return retList;
     }
 
     static class MyShip extends Coordinates {
