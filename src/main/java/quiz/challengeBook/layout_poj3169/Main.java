@@ -52,7 +52,7 @@ public class Main {
 	}
 
 	int res = d[N - 1];
-	if (d[0] < 0) {
+	if (d[N - 1] < 0) {
 	    res = -1;
 	} else if (res == Integer.MAX_VALUE) {
 	    res = -2;
