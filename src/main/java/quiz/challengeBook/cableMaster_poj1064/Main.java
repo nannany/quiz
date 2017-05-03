@@ -24,7 +24,8 @@ public class Main {
 
 	double ub = sum / K;
 
-	while (ub - lb > 0.01) {
+	// while (ub - lb > 0.01) {
+	for (int i = 0; i < 100; i++) {
 	    double mid = (ub + lb) / 2;
 	    int count = 0;
 	    for (Double l : L) {
