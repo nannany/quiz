@@ -5,24 +5,22 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+    static int N;
+    static int M;
+    static List<Integer> stones = new ArrayList<Integer>();
+
     public static void main(String[] args) {
 	Scanner sc = new Scanner(System.in);
 	int L = sc.nextInt();
-	int N = sc.nextInt();
-	int M = sc.nextInt();
+	N = sc.nextInt();
+	M = sc.nextInt();
 
-	List<Integer> stones = new ArrayList<Integer>();
 	stones.add(0);
 	for (int i = 0; i < N; i++) {
 	    stones.add(sc.nextInt());
 	}
 	stones.add(L);
 
-	// stones.sort(new Comparator<Integer>() {
-	// public int compare(Integer i1, Integer i2) {
-	// return i1.intValue() - i2.intValue();
-	// }
-	// });
 	int tmp = stones.get(1);
 	for (int i = 2; i <= N; i++) {
 	    if (stones.get(i).intValue() < tmp) {
@@ -31,35 +29,42 @@ public class Main {
 	    }
 	    tmp = stones.get(i);
 	}
-	// for (Integer i : stones) {
-	// System.out.println(i.intValue());
-	// }
 
-	List<Integer> distance = new ArrayList<Integer>();
+	int min = Integer.MAX_VALUE;
 	for (int i = 1; i <= N + 1; i++) {
-	    distance.add(stones.get(i) - stones.get(i - 1));
-	}
-
-	for (int i = 0; i < M; i++) {
-	    int min = Integer.MAX_VALUE;
-	    int removeTarget = -1;
-	    for (int j = 0; j < distance.size(); j++) {
-		if (distance.get(j).intValue() < min) {
-		    min = distance.get(j).intValue();
-		    removeTarget = j;
-		}
-	    }
-	    distance.set(removeTarget + 1, distance.get(removeTarget) + distance.get(removeTarget) + 1);
-	    distance.remove(removeTarget);
-	}
-
-	int ans = Integer.MAX_VALUE;
-	for (Integer forAns : distance) {
-	    if (forAns.intValue() < ans) {
-		ans = forAns.intValue();
+	    if (stones.get(i) - stones.get(i - 1) < min) {
+		min = stones.get(i) - stones.get(i - 1);
 	    }
 	}
 
-	System.out.println(ans);
+	int ub = L;
+	int lb = min;
+
+	while (ub - lb > 1) {
+	    int mid = (ub + lb) / 2;
+	    if (C(mid)) {
+		lb = mid;
+	    } else {
+		ub = mid;
+	    }
+	}
+	System.out.println(lb);
+    }
+
+    static boolean C(int d) {
+	int count = 0;
+	int tmpBase = d;
+	for (int i = 1; i <= N; i++) {
+	    if (stones.get(i).intValue() < tmpBase) {
+		count++;
+	    } else {
+		tmpBase = stones.get(i) + d;
+	    }
+	}
+	if (count <= M) {
+	    return true;
+	} else {
+	    return false;
+	}
     }
 }
