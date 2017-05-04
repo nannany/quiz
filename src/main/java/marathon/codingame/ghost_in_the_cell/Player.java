@@ -90,50 +90,64 @@ class Player {
 	    int retTo = 0;
 	    int retCyborgs = 0;
 
+	    // 一番サイボーグを持っている工場のID
+	    int maxCyborgsId = getIdHaveMaxCyborgs();
+
 	    // ニュートラルに送りこむ
 	    if (!neutoralFactorys.isEmpty()) {
-		int evaluateVal = Integer.MIN_VALUE;
-		for (Map.Entry<Integer, MyFactory> myFactory : myFactorys.entrySet()) {
-		    ArrayList<Edge> tmpList = graph.get(myFactory.getKey());
-		    int tmpEvaluateVal = Integer.MIN_VALUE;
-		    for (Edge edge : tmpList) {
-			if ("NEUTORAL".equals(factoryMap.get(edge.to))
-				&& getTroopSum(edge.to) <= neutoralFactorys.get(edge.to).numCyborgs) {
-			    if (evaluateVal < evaluateNeutoral(myFactory.getValue(), neutoralFactorys.get(edge.to),
-				    edge.distance)) {
-				tmpEvaluateVal = evaluateNeutoral(myFactory.getValue(), neutoralFactorys.get(edge.to),
-					edge.distance);
-				retTo = edge.to;
-				retFrom = myFactory.getKey();
-				System.err.println("retTo:" + retTo + " retFrom:" + retFrom + "dis");
+		if (getProductionCountFromNeutoral(3) == 0) {
+		    int evaluateVal = Integer.MIN_VALUE;
+		    for (Map.Entry<Integer, MyFactory> myFactory : myFactorys.entrySet()) {
+			ArrayList<Edge> tmpList = graph.get(myFactory.getKey());
+			int tmpEvaluateVal = Integer.MIN_VALUE;
+			for (Edge edge : tmpList) {
+			    if ("NEUTORAL".equals(factoryMap.get(edge.to))
+				    && getTroopSum(edge.to) <= neutoralFactorys.get(edge.to).numCyborgs) {
+				if (evaluateVal < evaluateNeutoral(myFactory.getValue(), neutoralFactorys.get(edge.to),
+					edge.distance)) {
+				    tmpEvaluateVal = evaluateNeutoral(myFactory.getValue(),
+					    neutoralFactorys.get(edge.to), edge.distance);
+				    retTo = edge.to;
+				    retFrom = myFactory.getKey();
+				    System.err.println("retTo:" + retTo + " retFrom:" + retFrom + "dis");
 
+				}
 			    }
 			}
+			if (evaluateVal < tmpEvaluateVal) {
+			    evaluateVal = tmpEvaluateVal;
+			}
+			// debug
+			// for (Edge edge : graph.get(myFactory.getKey())) {
+			// System.err.println(edge.to);
+			// }
 		    }
-		    if (evaluateVal < tmpEvaluateVal) {
-			evaluateVal = tmpEvaluateVal;
+		    if (neutoralFactorys.get(retTo) == null || myFactorys.get(retFrom) == null) {
+			System.out.println("WAIT");
+			continue flag1;
+		    } else if (myFactorys.get(retFrom).numCyborgs / 2 < neutoralFactorys.get(retTo).numCyborgs) {
+			retCyborgs = myFactorys.get(retFrom).numCyborgs / 2;
+		    } else {
+			retCyborgs = neutoralFactorys.get(retTo).numCyborgs + 10;
 		    }
-		    // debug
-		    // for (Edge edge : graph.get(myFactory.getKey())) {
-		    // System.err.println(edge.to);
-		    // }
-		}
-		if (neutoralFactorys.get(retTo) == null || myFactorys.get(retFrom) == null) {
-		    System.out.println("WAIT");
+		    System.out.println("MOVE " + retFrom + " " + retTo + " " + retCyborgs);
+		    System.err.println("toNeu:MOVE " + retFrom + " " + retTo + " " + retCyborgs);
 		    continue flag1;
-		} else if (myFactorys.get(retFrom).numCyborgs / 2 < neutoralFactorys.get(retTo).numCyborgs) {
-		    retCyborgs = myFactorys.get(retFrom).numCyborgs / 2;
 		} else {
-		    retCyborgs = neutoralFactorys.get(retTo).numCyborgs + 10;
+		    ArrayList<Integer> targetList = new ArrayList<Integer>();
+		    // targetList.addAll(getProductionIdListFromNeutoral(2));
+		    targetList.addAll(getProductionIdListFromNeutoral(3));
+		    // いくつに分散させるか
+		    int distributeCount = targetList.size();
+		    int distrtibuteCyborgsNum = myFactorys.get(maxCyborgsId).numCyborgs / (distributeCount + 1);
+		    for (Integer integer : targetList) {
+			System.out.print(
+				"MOVE " + maxCyborgsId + " " + integer.intValue() + " " + distrtibuteCyborgsNum + ";");
+		    }
+		    System.out.println("MSG Distribute Attack");
+		    continue flag1;
 		}
-		System.out.println("MOVE " + retFrom + " " + retTo + " " + retCyborgs);
-		System.err.println("toNeu:MOVE " + retFrom + " " + retTo + " " + retCyborgs);
-		continue flag1;
 	    }
-
-	    System.err.println("doubt");
-	    int maxCyborgsId = getIdHaveMaxCyborgs();
-	    System.err.println("maxCyborgsId:" + maxCyborgsId);
 
 	    // 敵に送り込む
 	    if (15 < myFactorys.get(maxCyborgsId).numCyborgs) {
@@ -158,6 +172,29 @@ class Player {
 	    System.out.println("WAIT");
 
 	}
+    }
+
+    // 引数で指定した生産能力をもつニュートラル工場のIDのリストを返す
+    static ArrayList<Integer> getProductionIdListFromNeutoral(int production) {
+	ArrayList<Integer> ret = new ArrayList<Integer>();
+	for (Map.Entry<Integer, NeutoralFactory> neutoralFactory : neutoralFactorys.entrySet()) {
+	    if (production == neutoralFactory.getValue().numProduction) {
+		ret.add(neutoralFactory.getKey());
+	    }
+	}
+	return ret;
+
+    }
+
+    // 引数で指定した生産能力を持つニュートラル工場の数を返す
+    static int getProductionCountFromNeutoral(int production) {
+	int retCount = 0;
+	for (Map.Entry<Integer, NeutoralFactory> neutoralFactory : neutoralFactorys.entrySet()) {
+	    if (production == neutoralFactory.getValue().numProduction) {
+		retCount++;
+	    }
+	}
+	return retCount;
     }
 
     // 敵と自分の距離を測る
