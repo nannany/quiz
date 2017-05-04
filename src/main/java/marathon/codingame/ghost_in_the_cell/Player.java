@@ -20,6 +20,8 @@ class Player {
     static HashMap<Integer, MyTroop> myTroops;
     static HashMap<Integer, EnemyTroop> enemyTroops;
     static HashMap<Integer, String> factoryMap;
+    static HashMap<Integer, MyBomb> myBombs;
+    static HashMap<Integer, EnemyBomb> enemyBombs;
 
     public static void main(String args[]) {
 	Scanner in = new Scanner(System.in);
@@ -47,6 +49,8 @@ class Player {
 	    myTroops = new HashMap<Integer, MyTroop>();
 	    enemyTroops = new HashMap<Integer, EnemyTroop>();
 	    factoryMap = new HashMap<Integer, String>();
+	    myBombs = new HashMap<Integer, MyBomb>();
+	    enemyBombs = new HashMap<Integer, EnemyBomb>();
 	    for (int i = 0; i < entityCount; i++) {
 		int entityId = in.nextInt();
 		String entityType = in.next();
@@ -72,6 +76,12 @@ class Player {
 		    } else {
 			enemyTroops.put(entityId, new EnemyTroop(arg2, arg3, arg4, arg5));
 		    }
+		} else if ("BOMB".equals(entityType)) {
+		    if (arg1 == 1) {
+			myBombs.put(entityId, new MyBomb(arg2, arg4, arg3));
+		    } else {
+			enemyBombs.put(entityId, new EnemyBomb(arg2, arg4));
+		    }
 		}
 	    }
 
@@ -81,22 +91,26 @@ class Player {
 	    int retTo = 0;
 	    int retCyborgs = 0;
 	    if (!neutoralFactorys.isEmpty()) {
+		int evaluateVal = Integer.MIN_VALUE;
 		for (Map.Entry<Integer, MyFactory> myFactory : myFactorys.entrySet()) {
 		    ArrayList<Edge> tmpList = graph.get(myFactory.getKey());
-		    int tmpMinDistance = Integer.MAX_VALUE;
+		    int tmpEvaluateVal = Integer.MIN_VALUE;
 		    for (Edge edge : tmpList) {
 			if ("NEUTORAL".equals(factoryMap.get(edge.to))) {
-			    if (edge.distance < tmpMinDistance) {
-				tmpMinDistance = edge.distance;
+			    if (evaluateVal < evaluateNeutoral(myFactory.getValue(), neutoralFactorys.get(edge.to),
+				    edge.distance)) {
+				tmpEvaluateVal = evaluateNeutoral(myFactory.getValue(), neutoralFactorys.get(edge.to),
+					edge.distance);
 				retTo = edge.to;
 				retFrom = myFactory.getKey();
-				System.err.println("retTo:" + retTo + " retFrom:" + retFrom + "dis" + tmpMinDistance);
+				System.err.println("retTo:" + retTo + " retFrom:" + retFrom + "dis");
 			    }
 			}
 		    }
-		    if (tmpMinDistance < minDistance) {
-			minDistance = tmpMinDistance;
+		    if (evaluateVal < tmpEvaluateVal) {
+			evaluateVal = tmpEvaluateVal;
 		    }
+		    // debug
 		    for (Edge edge : graph.get(myFactory.getKey())) {
 			System.err.println(edge.to);
 		    }
@@ -104,7 +118,7 @@ class Player {
 		if (myFactorys.get(retFrom).numCyborgs / 2 < neutoralFactorys.get(retTo).numCyborgs) {
 		    retCyborgs = myFactorys.get(retFrom).numCyborgs / 2;
 		} else {
-		    retCyborgs = neutoralFactorys.get(retTo).numCyborgs + 1;
+		    retCyborgs = neutoralFactorys.get(retTo).numCyborgs + 10;
 		}
 		System.out.println("MOVE " + retFrom + " " + retTo + " " + retCyborgs);
 		System.err.println("toNeu:MOVE " + retFrom + " " + retTo + " " + retCyborgs);
@@ -129,9 +143,9 @@ class Player {
     }
 
     // 最初ニュートラルを責める際に、どこに向かうか評価する関数
-//    static int evaluateNeutoral() {
-//
-//    }
+    static int evaluateNeutoral(MyFactory myFactory, NeutoralFactory neutoralFactory, int distance) {
+	return myFactory.numCyborgs - distance + neutoralFactory.numProduction * 5;
+    }
 
     // 自分の工場の中で一番サイボーグ持っているところのIDを返す。
     static int getIdHaveMaxCyborgs() {
@@ -220,6 +234,31 @@ class Player {
 	public EnemyTroop(int from, int to, int numCyborgs, int remainTurn) {
 	    super(from, to, numCyborgs, remainTurn);
 
+	}
+    }
+
+    static class Bomb {
+	int from, remainTurn;
+
+	public Bomb(int from, int remainTurn) {
+	    this.from = from;
+	    this.remainTurn = remainTurn;
+	}
+    }
+
+    static class MyBomb extends Bomb {
+	int to;
+
+	public MyBomb(int from, int remainTurn, int to) {
+	    super(from, remainTurn);
+	    this.to = to;
+	}
+    }
+
+    static class EnemyBomb extends Bomb {
+
+	public EnemyBomb(int from, int remainTurn) {
+	    super(from, remainTurn);
 	}
     }
 }
