@@ -1,4 +1,4 @@
-package quiz.challengeBook;
+package quiz.challengeBook.valueWhoseSumIs0_poj2785;
 
 import java.util.Scanner;
 
@@ -38,19 +38,12 @@ public class Main {
 	}
 	quickSort(cd, 0, N * N - 1);
 
+	long res = 0;
 	for (int i = 0; i < N * N; i++) {
-	    int lb = -1;
-	    int ub = N * N;
-	    int mid = (ub + lb) / 2;
-	    while (cd[lb] != cd[ub]) {
-		if (C(mid, i)) {
-		    lb = mid;
-		} else {
-		    ub = mid;
-		}
-	    }
+	    res += upperBound(cd, -ab[i]) - lowerBound(cd, -ab[i]);
 	}
 
+	System.out.println(res);
     }
 
     static boolean C(int mid, int abIndex) {
@@ -111,4 +104,76 @@ public class Main {
 	return k;
     }
 
+    static int[] intArrayTarget;
+    static int targetNum;
+
+    static public int upperBound(int[] target, int num) {
+	intArrayTarget = target;
+	targetNum = num;
+	int start = 0;
+	int end = target.length - 1;
+
+	while (start <= end) {
+	    int mid = (start + end) / 2;
+	    if (cForUpper(mid)) {
+		start = mid + 1;
+	    } else {
+		end = mid - 1;
+	    }
+	}
+	return start;
+    }
+
+    /**
+     * int配列から特定の値を二分探索で求める。 targetは昇順ソートされている必要がある。
+     * targetNum以上の値が初めて出現するindexを返す。
+     *
+     * @param target
+     * @param num
+     * @return start int
+     */
+    static public int lowerBound(int[] target, int num) {
+	intArrayTarget = target;
+	targetNum = num;
+	int start = 0;
+	int end = target.length - 1;
+
+	while (start <= end) {
+	    int mid = (start + end) / 2;
+	    if (cForLower(mid)) {
+		start = mid + 1;
+	    } else {
+		end = mid - 1;
+	    }
+	}
+	return start;
+    }
+
+    /**
+     * upperBoundにおける二分探索判定用に用いる。
+     *
+     * @param mid
+     * @return boolean
+     */
+    static private boolean cForUpper(int mid) {
+	if (intArrayTarget[mid] <= targetNum) {
+	    return true;
+	} else {
+	    return false;
+	}
+    }
+
+    /**
+     * lowerBoundにおける二分探索判定用に用いる。
+     *
+     * @param mid
+     * @return boolean
+     */
+    static private boolean cForLower(int mid) {
+	if (intArrayTarget[mid] < targetNum) {
+	    return true;
+	} else {
+	    return false;
+	}
+    }
 }
