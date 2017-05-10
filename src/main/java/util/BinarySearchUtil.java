@@ -13,12 +13,12 @@ public class BinarySearchUtil {
      * targetNumより大きい値がはじめて出現するindexを返す。
      *
      * @param target
-     * @param targetNum
+     * @param num
      * @return start int
      */
-    static public int upperBound(int[] target, int targetNum) {
+    static public int upperBound(int[] target, int num) {
 	intArrayTarget = target;
-	BinarySearchUtil.targetNum = targetNum;
+	targetNum = num;
 	int start = 0;
 	int end = target.length - 1;
 
@@ -38,12 +38,12 @@ public class BinarySearchUtil {
      * targetNum以上の値が初めて出現するindexを返す。
      *
      * @param target
-     * @param targetNum
+     * @param num
      * @return start int
      */
-    static public int lowerBound(int[] target, int targetNum) {
+    static public int lowerBound(int[] target, int num) {
 	intArrayTarget = target;
-	BinarySearchUtil.targetNum = targetNum;
+	targetNum = num;
 	int start = 0;
 	int end = target.length - 1;
 
@@ -65,7 +65,7 @@ public class BinarySearchUtil {
      * @return boolean
      */
     static private boolean cForUpper(int mid) {
-	if (intArrayTarget[mid] <= BinarySearchUtil.targetNum) {
+	if (intArrayTarget[mid] <= targetNum) {
 	    return true;
 	} else {
 	    return false;
@@ -79,7 +79,7 @@ public class BinarySearchUtil {
      * @return boolean
      */
     static private boolean cForLower(int mid) {
-	if (intArrayTarget[mid] < BinarySearchUtil.targetNum) {
+	if (intArrayTarget[mid] < targetNum) {
 	    return true;
 	} else {
 	    return false;
