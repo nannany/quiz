@@ -2,12 +2,16 @@ package marathon.codingame.code4life;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 class Player {
     static String molecules[] = { "A", "B", "C", "D", "E" };
     static MyStatus myStatus;
+    static Map<Integer, String> idStatusMap = new HashMap<Integer, String>();
+    static int id = 0;
 
     public static void main(String args[]) {
 
@@ -21,7 +25,6 @@ class Player {
 	    int e = in.nextInt();
 	}
 
-	List<Sample> mySampleList = new ArrayList<Sample>();
 	while (true) {
 	    myStatus = new MyStatus(in.next(), in.nextInt(), in.nextInt(), in.nextInt(), in.nextInt(), in.nextInt(),
 		    in.nextInt(), in.nextInt(), in.nextInt(), in.nextInt(), in.nextInt(), in.nextInt(), in.nextInt());
@@ -35,34 +38,69 @@ class Player {
 	    int availableE = in.nextInt();
 	    int sampleCount = in.nextInt();
 	    List<Sample> sampleList = new ArrayList<Sample>();
+	    List<Sample> mySampleList = new ArrayList<Sample>();
+
 	    for (int i = 0; i < sampleCount; i++) {
 		Sample sample = new Sample(in.nextInt(), in.nextInt(), in.nextInt(), in.next(), in.nextInt(),
 			in.nextInt(), in.nextInt(), in.nextInt(), in.nextInt(), in.nextInt());
 		sampleList.add(sample);
 	    }
 
-	    sampleList.stream().forEach(smple -> System.err.println(smple.sampleId));
+	    // mySampleList初期化
+	    sampleList.stream().filter(sample -> sample.carriedBy == 0).forEach(sample -> mySampleList.add(sample));
+	    mySampleList.stream().forEach(s -> System.err.println("my" + s.sampleId));
 
-	    String ret = "GOTO DIAGNOSIS";
-	    if ("DIAGNOSIS".equals(myStatus.target)) {
+	    // id 初期化
+	    id = sampleList.size() == 0 ? 0 : sampleList.stream().sorted((smp1, smp2) -> {
+		return smp2.sampleId - smp1.sampleId;
+	    }).findFirst().get().sampleId + 1;
+	    System.err.println("id" + id);
+
+	    sampleList.stream().forEach(smple -> System.err.println(smple.sampleId + "carriedId" + smple.carriedBy));
+
+	    String ret = "GOTO SAMPLES";
+	    if (sampleList.size() == 0 && !"SAMPLES".equals(myStatus.target)) {
+		System.out.println("GOTO SAMPLES");
+		continue;
+	    }
+
+	    if ("SAMPLES".equals(myStatus.target)) {
 		if (getSumOfMySample(sampleList) == 3) {
-		    ret = "GOTO MOLECULES";
+		    if (mySampleList.stream().anyMatch(sample -> !"diagnosed".equals(idStatusMap.get(sample.sampleId)))
+			    || mySampleList.size() == 0) {
+			ret = "GOTO DIAGNOSIS";
+		    } else {
+			ret = "GOTO MOLECULES";
+		    }
 		} else {
-		    Sample targetSample = sampleList.stream().sorted(new Comparator<Sample>() {
-			public int compare(Sample s1, Sample s2) {
-			    return evaluateSample(s2) - evaluateSample(s1);
-			}
-		    }).filter(sample -> sample.carriedBy == -1).findFirst().get();
-
-		    ret = "CONNECT " + targetSample.sampleId;
-		    mySampleList.add(targetSample);
-
-		    // mySampleList は常に評価値の降順で並んでいるようにする。
-		    mySampleList.stream().sorted(new Comparator<Sample>() {
-			public int compare(Sample s1, Sample s2) {
-			    return evaluateSample(s2) - evaluateSample(s1);
-			}
+		    // Sample targetSample = sampleList.stream().sorted(new
+		    // EvaluateValueComparator())
+		    // .filter(sample -> sample.carriedBy ==
+		    // -1).findFirst().get();
+		    //
+		    // ret = "CONNECT " + targetSample.rank;
+		    // mySampleList.add(targetSample);
+		    // // mySampleList は常に評価値の降順で並んでいるようにする。
+		    // mySampleList.stream().sorted(new
+		    // EvaluateValueComparator());
+		    ret = "CONNECT 2";
+		    idStatusMap.put(id, "undiagnosed");
+		}
+	    } else if ("DIAGNOSIS".equals(myStatus.target)) {
+		if (mySampleList.size() != 0 && mySampleList.stream()
+			.allMatch(sample -> "diagnosed".equals(idStatusMap.get(sample.sampleId)))) {
+		    ret = "GOTO MOLECULES";
+		    idStatusMap.forEach((integer, str) -> {
+			System.err.println(integer.intValue() + " " + str);
 		    });
+		} else {
+		    Sample targetSample = mySampleList.stream()
+			    .filter(sample -> !"diagnosed".equals(idStatusMap.get(sample.sampleId))).findFirst().get();
+		    ret = "CONNECT " + targetSample.sampleId;
+		    idStatusMap.put(targetSample.sampleId, "diagnosed");
+		    mySampleList.add(targetSample);
+		    // mySampleList は常に評価値の降順で並んでいるようにする。
+		    mySampleList.stream().sorted(new EvaluateValueComparator());
 		}
 	    } else if ("MOLECULES".equals(myStatus.target)) {
 		if (myStatus.sumOfStorage == 10) {
@@ -85,7 +123,7 @@ class Player {
 		// LABORATORY にいる場合
 	    } else {
 		if (mySampleList.size() == 0) {
-		    ret = "GOTO DIAGNOSIS";
+		    ret = "GOTO SAMPLES";
 		} else {
 		    if ("enough".equals(investigateHaveMolecules(mySampleList.get(0)))) {
 			ret = "CONNECT " + mySampleList.remove(0).sampleId;
@@ -96,6 +134,12 @@ class Player {
 	    }
 
 	    System.out.println(ret);
+	}
+    }
+
+    static class EvaluateValueComparator implements Comparator<Sample> {
+	public int compare(Sample s1, Sample s2) {
+	    return evaluateSample(s2) - evaluateSample(s1);
 	}
     }
 
@@ -118,7 +162,13 @@ class Player {
 
     // sampleの価値評価を返す。
     static int evaluateSample(Sample sample) {
-	return sample.health - sample.getSimpleTotalCost();
+	if (sample.rank == 2) {
+	    return sample.health - sample.getSimpleTotalCost() + 20;
+	} else if (sample.rank == 1) {
+	    return sample.health - sample.getSimpleTotalCost() + 10;
+	} else {
+	    return sample.health - sample.getSimpleTotalCost();
+	}
     }
 
     static int getSumOfMySample(List<Sample> sampleList) {
@@ -144,6 +194,8 @@ class Player {
     static class Sample {
 	int sampleId, carriedBy, rank, health, costA, costB, costC, costD, costE;
 	String expertiseGain;
+
+	String status = "unsettled";
 
 	public Sample(int sampleId, int carriedBy, int rank, String expertiseGain, int health, int costA, int costB,
 		int costC, int costD, int costE) {
