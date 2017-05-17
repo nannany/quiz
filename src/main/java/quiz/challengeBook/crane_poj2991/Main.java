@@ -30,9 +30,9 @@ public class Main {
 	}
 
 	prv = new double[N];
-	vx = new double[2 * N - 1];
-	vy = new double[2 * N - 1];
-	ang = new double[2 * N - 1];
+	vx = new double[2 * N];
+	vy = new double[2 * N];
+	ang = new double[2 * N];
 	init(0, 0, N);
 	for (int i = 1; i < N; i++) {
 	    prv[i] = Math.PI;
@@ -59,8 +59,8 @@ public class Main {
     static void init(int k, int l, int r) {
 	ang[k] = vx[k] = 0.0;
 
-	if (r - 1 == 1) {
-	    vy[k] = L[1];
+	if (r - l == 1) {
+	    vy[k] = L[l];
 	} else {
 	    int chl = k * 2 + 1;
 	    int chr = k * 2 + 2;
