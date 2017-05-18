@@ -12,41 +12,42 @@ public class Main {
     static double[] vy;
     static double[] ang;
     static double[] prv;
+    static int stSize = 1 << 15 - 1;
 
     public static void main(String[] args) {
-
 	Scanner sc = new Scanner(System.in);
-	int N = sc.nextInt();
-	int C = sc.nextInt();
-	L = new int[N];
-	for (int i = 0; i < N; i++) {
-	    L[i] = sc.nextInt();
-	}
-	S = new int[C];
-	A = new int[C];
-	for (int i = 0; i < C; i++) {
-	    S[i] = sc.nextInt();
-	    A[i] = sc.nextInt();
-	}
+	while (true) {
+	    int N = sc.nextInt();
+	    int C = sc.nextInt();
+	    L = new int[N];
+	    for (int i = 0; i < N; i++) {
+		L[i] = sc.nextInt();
+	    }
+	    S = new int[C];
+	    A = new int[C];
+	    for (int i = 0; i < C; i++) {
+		S[i] = sc.nextInt();
+		A[i] = sc.nextInt();
+	    }
 
-	prv = new double[N];
-	vx = new double[2 * N];
-	vy = new double[2 * N];
-	ang = new double[2 * N];
-	init(0, 0, N);
-	for (int i = 1; i < N; i++) {
-	    prv[i] = Math.PI;
-	}
+	    prv = new double[N];
+	    vx = new double[stSize];
+	    vy = new double[stSize];
+	    ang = new double[stSize];
+	    init(0, 0, N);
+	    for (int i = 1; i < N; i++) {
+		prv[i] = Math.PI;
+	    }
 
-	for (int i = 0; i < C; i++) {
-	    int s = S[i];
-	    double a = A[i] / 360 * 2 * Math.PI;
-	    change(s, a - prv[s], 0, 0, N);
-	    prv[s] = a;
+	    for (int i = 0; i < C; i++) {
+		int s = S[i];
+		double a = A[i] / 360.0 * 2 * Math.PI;
+		change(s, a - prv[s], 0, 0, N);
+		prv[s] = a;
 
-	    System.out.printf("%.2f %.2f\n", vx[0], vy[0]);
+		System.out.printf("%.2f %.2f\n", vx[0], vy[0]);
+	    }
 	}
-	sc.close();
     }
 
     /**
@@ -70,11 +71,21 @@ public class Main {
 	}
     }
 
+    /**
+     *
+     * @param s:場所
+     * @param a:角度の変更
+     * @param v:接点番号
+     * @param l:
+     * @param r:
+     */
     static void change(int s, double a, int v, int l, int r) {
 	if (s <= l) {
 	    return;
 	} else if (s < r) {
+	    // 左の子ノード
 	    int chl = v * 2 + 1;
+	    // 右の子ノード
 	    int chr = v * 2 + 2;
 	    int m = (l + r) / 2;
 	    change(s, a, chl, l, m);
@@ -87,6 +98,7 @@ public class Main {
 
 	    vx[v] = vx[chl] + (cos * vx[chr] - sin * vy[chr]);
 	    vy[v] = vy[chl] + (sin * vx[chr] + cos * vy[chr]);
+
 	}
     }
 }
