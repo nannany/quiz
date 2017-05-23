@@ -46,9 +46,9 @@ public class Main {
 
 	for (int i = 0; i < Q; i++) {
 	    if ("C".equals(T[i])) {
-		add(L[i], R[i] + 1, X[i], 0, 0, N);
+		add(L[i] - 1, R[i], X[i], 0, 0, N);
 	    } else {
-		System.out.printf("%d\n", sum(L[i], R[i] + 1, 0, 0, N));
+		System.out.println(sum(L[i] - 1, R[i], 0, 0, N));
 	    }
 	}
 	sc.close();
