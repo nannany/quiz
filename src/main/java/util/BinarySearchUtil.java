@@ -1,5 +1,7 @@
 package util;
 
+import java.util.ArrayList;
+
 public class BinarySearchUtil {
     // インスタンスは作らせない。
     private BinarySearchUtil() {
@@ -7,6 +9,7 @@ public class BinarySearchUtil {
 
     static int[] intArrayTarget;
     static int targetNum;
+    static ArrayList<Integer> intArrayTargetForArrayList;
 
     /**
      * int配列から特定の値を二分探索で求める。 targetは昇順ソートされている必要がある。
@@ -25,6 +28,23 @@ public class BinarySearchUtil {
 	while (start <= end) {
 	    int mid = (start + end) / 2;
 	    if (cForUpper(mid)) {
+		start = mid + 1;
+	    } else {
+		end = mid - 1;
+	    }
+	}
+	return start;
+    }
+
+    static public int upperBound(ArrayList<Integer> target, int num) {
+	intArrayTargetForArrayList = target;
+	targetNum = num;
+	int start = 0;
+	int end = target.size() - 1;
+
+	while (start <= end) {
+	    int mid = (start + end) / 2;
+	    if (cForUpperForArrayList(mid)) {
 		start = mid + 1;
 	    } else {
 		end = mid - 1;
@@ -66,6 +86,14 @@ public class BinarySearchUtil {
      */
     static private boolean cForUpper(int mid) {
 	if (intArrayTarget[mid] <= targetNum) {
+	    return true;
+	} else {
+	    return false;
+	}
+    }
+
+    static private boolean cForUpperForArrayList(int mid) {
+	if (intArrayTargetForArrayList.get(mid) <= targetNum) {
 	    return true;
 	} else {
 	    return false;
