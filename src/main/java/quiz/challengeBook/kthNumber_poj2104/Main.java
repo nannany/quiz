@@ -62,8 +62,8 @@ public class Main {
 	    while (ub - lb > 1) {
 		int md = (lb + ub) / 2;
 		int x = nums[md];
-		int tl = l;
-		int tr = r;
+		int tl = l - 1;
+		int tr = r - 1;
 		int c = 0;
 		while (tl < tr && tl % B != 0) {
 		    if (A[tl++] <= x) {
