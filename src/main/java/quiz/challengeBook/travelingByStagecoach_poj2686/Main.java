@@ -31,12 +31,16 @@ public class Main {
 		t[i] = sc.nextInt();
 	    }
 
-	    d = new int[M + 1][M + 1];
+	    d = new int[M][M];
 	    for (int i = 0; i < M; i++) {
 		Arrays.fill(d[i], -1);
 	    }
 	    for (int i = 0; i < p; i++) {
-		d[sc.nextInt()][sc.nextInt()] = sc.nextInt();
+		int pos1 = sc.nextInt() - 1;
+		int pos2 = sc.nextInt() - 1;
+		int dis = sc.nextInt();
+		d[pos1][pos2] = dis;
+		d[pos2][pos1] = dis;
 	    }
 
 	    for (int i = 0; i < 1 << N; i++) {
@@ -60,10 +64,20 @@ public class Main {
 		    }
 		}
 	    }
+//	    for (int i = 0; i < 1 << N; i++) {
+//		for (int j = 0; j < M; j++) {
+//		    System.out.printf("%f%c", dp[i][j], j == M - 1 ? '\n' : ' ');
+//		}
+//	    }
+//	    for (int i = 0; i < M; i++) {
+//		for (int j = 0; j < M; j++) {
+//		    System.out.printf("%d%c", d[i][j], j == M - 1 ? '\n' : ' ');
+//		}
+//	    }
 	    if (res == Integer.MAX_VALUE) {
 		System.out.println("Impossible");
 	    } else {
-		System.out.println(res);
+		System.out.printf("%.3f\n", res);
 	    }
 	}
     }
