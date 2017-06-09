@@ -1,6 +1,5 @@
 package quiz.challengeBook.minimizingMaximizer_poj1769;
 
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
@@ -20,6 +19,7 @@ public class Main {
 	}
 
 	init(n);
+	int maxV = tmpN;
 	for (int i = 0; i <= n; i++) {
 	    dp[i] = Integer.MAX_VALUE - 10;
 	}
@@ -27,20 +27,20 @@ public class Main {
 	update(1, 0);
 
 	for (int i = 0; i < m; i++) {
-	    System.out.println("s" + s[i]);
-	    int v = Math.min(dp[t[i]], query(s[i], t[i] + 1, 0, 0, n) + 1);
-	    System.out.println(v);
+	    // System.out.println("s" + s[i]);
+	    int v = Math.min(dp[t[i]], query(s[i], t[i] + 1, 0, 0, maxV) + 1);
+	    // System.out.println(v);
 	    dp[t[i]] = v;
 	    update(t[i], v);
 	}
 
-	Arrays.stream(dp).boxed().forEach(i -> System.out.print(i + " "));
-	System.out.println("\r\nans");
+	// Arrays.stream(dp).boxed().forEach(i -> System.out.print(i + " "));
+	// System.out.println("\r\nans");
 	System.out.println(dp[n]);
 
-	for (int i = 0; i < 128; i++) {
-	    System.out.println(dat[i]);
-	}
+	// for (int i = 0; i < 128; i++) {
+	// System.out.println(dat[i]);
+	// }
 	sc.close();
     }
 
@@ -75,7 +75,7 @@ public class Main {
 	} else {
 	    int vl = query(a, b, k * 2 + 1, l, (l + r) / 2);
 	    int vr = query(a, b, k * 2 + 2, (l + r) / 2, r);
-	    System.out.println("min" + Math.min(vl, vr));
+	    // System.out.println("min" + Math.min(vl, vr));
 	    return Math.min(vl, vr);
 	}
     }
