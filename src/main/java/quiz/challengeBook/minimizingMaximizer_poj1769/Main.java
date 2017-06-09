@@ -27,6 +27,7 @@ public class Main {
 	update(1, 0);
 
 	for (int i = 0; i < m; i++) {
+	    System.out.println("s" + s[i]);
 	    int v = Math.min(dp[t[i]], query(s[i], t[i] + 1, 0, 0, n) + 1);
 	    System.out.println(v);
 	    dp[t[i]] = v;
@@ -34,9 +35,12 @@ public class Main {
 	}
 
 	Arrays.stream(dp).boxed().forEach(i -> System.out.print(i + " "));
-
+	System.out.println("\r\nans");
 	System.out.println(dp[n]);
 
+	for (int i = 0; i < 128; i++) {
+	    System.out.println(dat[i]);
+	}
 	sc.close();
     }
 
@@ -64,13 +68,14 @@ public class Main {
 
     static int query(int a, int b, int k, int l, int r) {
 	if (r <= a || b <= l) {
-	    return Integer.MAX_VALUE;
+	    return Integer.MAX_VALUE - 10;
 	}
 	if (a <= l && r <= b) {
 	    return dat[k];
 	} else {
 	    int vl = query(a, b, k * 2 + 1, l, (l + r) / 2);
 	    int vr = query(a, b, k * 2 + 2, (l + r) / 2, r);
+	    System.out.println("min" + Math.min(vl, vr));
 	    return Math.min(vl, vr);
 	}
     }
