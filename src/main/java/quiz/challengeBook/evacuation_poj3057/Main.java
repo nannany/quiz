@@ -23,8 +23,18 @@ public class Main {
 	for (int i = 0; i < T; i++) {
 	    X = sc.nextInt();
 	    Y = sc.nextInt();
+	    int n = X * Y;
 	    field = new String[X][Y];
 	    dist = new int[X][Y][X][Y];
+	    for (int j = 0; j < X; j++) {
+		for (int k = 0; k < Y; k++) {
+		    for (int l = 0; l < X; l++) {
+			for (int m = 0; m < Y; m++) {
+			    dist[j][k][l][m] = -1;
+			}
+		    }
+		}
+	    }
 	    for (int j = 0; j < X; j++) {
 		String tmp = sc.next();
 		for (int k = 0; k < Y; k++) {
@@ -37,6 +47,18 @@ public class Main {
 		    if (field[j][k].equals(".")) {
 			pX.add(j);
 			pY.add(k);
+		    }
+		}
+	    }
+
+	    int d = dX.size();
+	    int p = pX.size();
+	    for (int j = 0; j < d; j++) {
+		for (int k = 0; k < p; k++) {
+		    if (dist[dX.get(j)][dY.get(j)][pX.get(k)][pY.get(k)] >= 0) {
+			for (int l = dist[dX.get(j)][dY.get(j)][pX.get(k)][pY.get(k)]; l <= n; l++) {
+			    // addEdge()
+			}
 		    }
 		}
 	    }
