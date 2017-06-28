@@ -13,6 +13,9 @@ public class Main {
     static ArrayList<Integer> pX = new ArrayList<Integer>();
     static ArrayList<Integer> pY = new ArrayList<Integer>();
     static int[][][][] dist;
+    static boolean used[];
+    static int match[];
+    static ArrayList<Integer>[] G;
 
     static final int[] dx = { -1, 0, 0, 1 };
     static final int[] dy = { 0, -1, 1, 0 };
@@ -53,22 +56,45 @@ public class Main {
 
 	    int d = dX.size();
 	    int p = pX.size();
+	    G = new ArrayList[n * d + p];
 	    for (int j = 0; j < d; j++) {
 		for (int k = 0; k < p; k++) {
 		    if (dist[dX.get(j)][dY.get(j)][pX.get(k)][pY.get(k)] >= 0) {
 			for (int l = dist[dX.get(j)][dY.get(j)][pX.get(k)][pY.get(k)]; l <= n; l++) {
-			    // addEdge()
+			    addEdge((k - 1) * d + i, n * d + j);
 			}
 		    }
 		}
 	    }
 
+	    if (p == 0) {
+		System.out.println(0);
+		return;
+	    }
+	    int num = 0;
+
 	}
 	sc.close();
     }
 
-    static void solve() {
-	int n = X * Y;
+    static boolean dfs(int v) {
+	used[v] = true;
+	for (int i = 0; i < G[v].size(); i++) {
+	    int u = G[v].get(i);
+	    int w = match[u];
+
+	    if (w < 0 || !used[w] && dfs(w)) {
+		match[v] = u;
+		match[u] = v;
+		return true;
+	    }
+	}
+	return false;
+    }
+
+    static void addEdge(int u, int v) {
+	G[u].add(v);
+	G[v].add(u);
     }
 
     static void bfs(int x, int y, int[][] d) {
