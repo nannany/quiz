@@ -8,10 +8,10 @@ import java.util.Scanner;
 public class Main {
     static int X, Y;
     static String[][] field;
-    static ArrayList<Integer> dX = new ArrayList<Integer>();
-    static ArrayList<Integer> dY = new ArrayList<Integer>();
-    static ArrayList<Integer> pX = new ArrayList<Integer>();
-    static ArrayList<Integer> pY = new ArrayList<Integer>();
+    static ArrayList<Integer> dX;
+    static ArrayList<Integer> dY;
+    static ArrayList<Integer> pX;
+    static ArrayList<Integer> pY;
     static int[][][][] dist;
     static boolean used[];
     static int match[];
@@ -23,11 +23,18 @@ public class Main {
     public static void main(String[] args) {
 	Scanner sc = new Scanner(System.in);
 	int T = sc.nextInt();
-	for (int i = 0; i < T; i++) {
+	flag:for (int i = 0; i < T; i++) {
 	    X = sc.nextInt();
 	    Y = sc.nextInt();
-	    int n = X * Y;
 	    field = new String[X][Y];
+	    for (int j = 0; j < X; j++) {
+		String tmp = sc.next();
+		for (int k = 0; k < Y; k++) {
+		    field[j][k] = String.valueOf(tmp.charAt(k));
+		}
+	    }
+
+	    int n = X * Y;
 	    dist = new int[X][Y][X][Y];
 	    for (int j = 0; j < X; j++) {
 		for (int k = 0; k < Y; k++) {
@@ -38,10 +45,13 @@ public class Main {
 		    }
 		}
 	    }
+	    dX = new ArrayList<Integer>();
+	    dY = new ArrayList<Integer>();
+	    pX = new ArrayList<Integer>();
+	    pY = new ArrayList<Integer>();
+
 	    for (int j = 0; j < X; j++) {
-		String tmp = sc.next();
 		for (int k = 0; k < Y; k++) {
-		    field[j][k] = String.valueOf(tmp.charAt(k));
 		    if (field[j][k].equals("D")) {
 			dX.add(j);
 			dY.add(k);
@@ -57,11 +67,15 @@ public class Main {
 	    int d = dX.size();
 	    int p = pX.size();
 	    G = new ArrayList[n * d + p];
+	    for (int j = 0; j < n * d + p; j++) {
+		G[j] = new ArrayList<Integer>();
+	    }
+
 	    for (int j = 0; j < d; j++) {
 		for (int k = 0; k < p; k++) {
 		    if (dist[dX.get(j)][dY.get(j)][pX.get(k)][pY.get(k)] >= 0) {
 			for (int l = dist[dX.get(j)][dY.get(j)][pX.get(k)][pY.get(k)]; l <= n; l++) {
-			    addEdge((k - 1) * d + i, n * d + j);
+			    addEdge((l - 1) * d + j, n * d + k);
 			}
 		    }
 		}
@@ -69,11 +83,28 @@ public class Main {
 
 	    if (p == 0) {
 		System.out.println(0);
-		return;
+		continue flag;
 	    }
 	    int num = 0;
+	    match = new int[n * d + p];
+	    for (int j = 0; j < match.length; j++) {
+		match[j] = -1;
+	    }
+	    for (int v = 0; v < n * d; v++) {
+		// booleanの初期値はfalse
+		used = new boolean[n * d + p];
+		if (dfs(v)) {
+		    if (++num == p) {
+			System.out.println(v / d + 1);
+			continue flag;
+		    }
+		}
+	    }
+
+	    System.out.println("impossible");
 
 	}
+
 	sc.close();
     }
 
@@ -109,7 +140,7 @@ public class Main {
 	    for (int k = 0; k < 4; k++) {
 		int x2 = x + dx[k];
 		int y2 = y + dy[k];
-		if (0 <= x2 && x2 < X && 0 <= y2 && y2 < Y && field[x2][y2] == "." && d[x2][y2] < 0) {
+		if (0 <= x2 && x2 < X && 0 <= y2 && y2 < Y && field[x2][y2].equals(".") && d[x2][y2] < 0) {
 		    d[x2][y2] = d[x][y] + 1;
 		    qx.add(x2);
 		    qy.add(y2);
