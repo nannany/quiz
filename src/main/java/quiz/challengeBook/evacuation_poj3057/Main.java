@@ -108,6 +108,7 @@ public class Main {
 	sc.close();
     }
 
+    // 深さ優先
     static boolean dfs(int v) {
 	used[v] = true;
 	for (int i = 0; i < G[v].size(); i++) {
@@ -128,6 +129,7 @@ public class Main {
 	G[v].add(u);
     }
 
+    // 幅優先
     static void bfs(int x, int y, int[][] d) {
 	Queue<Integer> qx = new LinkedList<Integer>();
 	Queue<Integer> qy = new LinkedList<Integer>();
