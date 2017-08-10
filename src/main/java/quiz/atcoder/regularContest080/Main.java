@@ -31,11 +31,14 @@ public class Main {
 	int N;
 
 	public SegTree(int n) {
-	    N = n;
+	    N = 1;
+	    while (N < n) {
+		N *= 2;
+	    }
 
 	    this.dat = new NumAndPos[2 * N];
 	    for (int i = 0; i < 2 * N; i++) {
-		dat[i] = new NumAndPos(-1, -1);
+		dat[i] = new NumAndPos(Integer.MAX_VALUE, i);
 	    }
 
 	}
@@ -104,15 +107,17 @@ public class Main {
 	    }
 	}
 
+	int oldN = N;
+	N = evenSegTree.N;
 	Queue<Range> pq = new PriorityQueue<Range>(N, new MyComparator());
 	pq.add(new Range(0, N));
 	ArrayList<Integer> ans = new ArrayList<Integer>();
-	while (ans.size() != N) {
+	while (ans.size() != oldN) {
 	    Range tmpRange = pq.poll();
 	    if (tmpRange.start % 2 == 0) {
 		NumAndPos nap1 = evenSegTree.query(tmpRange.start, tmpRange.end, 0, 0, N);
 		ans.add(nap1.num);
-		NumAndPos nap2 = oddSegTree.query(tmpRange.start, tmpRange.end, 0, 0, N);
+		NumAndPos nap2 = oddSegTree.query(nap1.pos, tmpRange.end, 0, 0, N);
 		ans.add(nap2.num);
 		pq.add(new Range(tmpRange.start, nap1.pos));
 		pq.add(new Range(nap1.pos + 1, nap2.pos));
@@ -120,7 +125,7 @@ public class Main {
 	    } else {
 		NumAndPos nap1 = oddSegTree.query(tmpRange.start, tmpRange.end, 0, 0, N);
 		ans.add(nap1.num);
-		NumAndPos nap2 = evenSegTree.query(tmpRange.start, tmpRange.end, 0, 0, N);
+		NumAndPos nap2 = evenSegTree.query(nap1.pos, tmpRange.end, 0, 0, N);
 		ans.add(nap2.num);
 		pq.add(new Range(tmpRange.start, nap1.pos));
 		pq.add(new Range(nap1.pos + 1, nap2.pos));
