@@ -9,6 +9,7 @@ import java.util.Scanner;
  **/
 class Player {
     static ArrayList<Wreck> wreckList = new ArrayList<>();
+    static Reaper myReaper;
 
     public static void main(String args[]) {
 	Scanner in = new Scanner(System.in);
@@ -41,7 +42,7 @@ class Player {
 
 		if (unitType == 0) {
 		    if (player == 0) {
-			Reaper myReaper = new Reaper(unitId, player, mass, radius, x, y, vx, vy);
+			myReaper = new Reaper(unitId, player, mass, radius, x, y, vx, vy);
 		    } else if (player == 1) {
 			Reaper enemyReaper1 = new Reaper(unitId, player, mass, radius, x, y, vx, vy);
 		    } else {
@@ -54,9 +55,52 @@ class Player {
 
 	    }
 
+	    int retX = nearestWreckFromMyReaper(myReaper).x;
+	    int retY = nearestWreckFromMyReaper(myReaper).y;
+
+	    Throttle(retX, retY, 300);
 	    System.out.println("WAIT");
 	    System.out.println("WAIT");
-	    System.out.println("WAIT");
+	}
+    }
+
+    /**
+     * 加速をsysoutするラッパー
+     *
+     * @param x
+     * @param y
+     * @param throttle
+     */
+    private static void Throttle(int x, int y, int throttle) {
+	System.out.println(x + " " + y + " " + throttle);
+    }
+
+    /**
+     * 指定したReaperから一番近い位置にあるWreckのPosを返す。
+     *
+     * @return
+     */
+    private static Pos nearestWreckFromMyReaper(Reaper reaper) {
+	Wreck retWreck = new Wreck();
+	int distance = Integer.MAX_VALUE;
+	for (Wreck w : wreckList) {
+	    int tmpDistance = Math.abs(w.x - reaper.x) + Math.abs(w.y - reaper.y);
+	    if (tmpDistance < distance) {
+		distance = tmpDistance;
+		retWreck = w;
+	    }
+	}
+
+	return new Pos(retWreck.x, retWreck.y);
+    }
+
+    // 位置情報
+    static class Pos {
+	int x, y;
+
+	public Pos(int x, int y) {
+	    this.x = x;
+	    this.y = y;
 	}
     }
 
@@ -83,69 +127,6 @@ class Player {
 	    this.vy = vy;
 	}
 
-	public int getUnitId() {
-	    return unitId;
-	}
-
-	public void setUnitId(int unitId) {
-	    this.unitId = unitId;
-	}
-
-	public int getPlayerId() {
-	    return playerId;
-	}
-
-	public void setPlayerId(int playerId) {
-	    this.playerId = playerId;
-	}
-
-	public float getMass() {
-	    return mass;
-	}
-
-	public void setMass(float mass) {
-	    this.mass = mass;
-	}
-
-	public int getRadius() {
-	    return radius;
-	}
-
-	public void setRadius(int radius) {
-	    this.radius = radius;
-	}
-
-	public int getX() {
-	    return x;
-	}
-
-	public void setX(int x) {
-	    this.x = x;
-	}
-
-	public int getY() {
-	    return y;
-	}
-
-	public void setY(int y) {
-	    this.y = y;
-	}
-
-	public int getVx() {
-	    return vx;
-	}
-
-	public void setVx(int vx) {
-	    this.vx = vx;
-	}
-
-	public int getVy() {
-	    return vy;
-	}
-
-	public void setVy(int vy) {
-	    this.vy = vy;
-	}
     }
 
     // 水場
@@ -154,34 +135,14 @@ class Player {
 	int x;
 	int y;
 
+	public Wreck() {
+
+	}
+
 	public Wreck(int unitId, int x, int y) {
 	    super();
 	    this.unitId = unitId;
 	    this.x = x;
-	    this.y = y;
-	}
-
-	public int getUnitId() {
-	    return unitId;
-	}
-
-	public void setUnitId(int unitId) {
-	    this.unitId = unitId;
-	}
-
-	public int getX() {
-	    return x;
-	}
-
-	public void setX(int x) {
-	    this.x = x;
-	}
-
-	public int getY() {
-	    return y;
-	}
-
-	public void setY(int y) {
 	    this.y = y;
 	}
 
