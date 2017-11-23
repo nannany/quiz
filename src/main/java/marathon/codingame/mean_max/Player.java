@@ -8,7 +8,7 @@ import java.util.Scanner;
  * according to the problem statement.
  **/
 class Player {
-    static ArrayList<Wreck> wreckList = new ArrayList<>();
+    static ArrayList<Wreck> wreckList;
     static Reaper myReaper;
 
     public static void main(String args[]) {
@@ -27,6 +27,7 @@ class Player {
 	    int enemyRage2 = in.nextInt();
 
 	    int unitCount = in.nextInt();
+	    wreckList = new ArrayList<>();
 	    for (int i = 0; i < unitCount; i++) {
 		int unitId = in.nextInt();
 		int unitType = in.nextInt();
@@ -49,16 +50,18 @@ class Player {
 			Reaper enemyReaper2 = new Reaper(unitId, player, mass, radius, x, y, vx, vy);
 		    }
 		} else if (unitType == 4) {
-		    Wreck wreck = new Wreck(unitId, x, y);
-		    wreckList.add(wreck);
+		    Wreck wreck = new Wreck(unitId, x, y, extra);
+		    if (wreck.water > 0) {
+			wreckList.add(wreck);
+		    } else {
+
+		    }
 		}
 
 	    }
 
-	    int retX = nearestWreckFromMyReaper(myReaper).x;
-	    int retY = nearestWreckFromMyReaper(myReaper).y;
-
-	    Throttle(retX, retY, 300);
+	    Pos tmpPos = nearestWreckFromMyReaper(myReaper);
+	    Throttle(tmpPos.x, tmpPos.y, 300);
 	    System.out.println("WAIT");
 	    System.out.println("WAIT");
 	}
@@ -88,6 +91,7 @@ class Player {
 	    if (tmpDistance < distance) {
 		distance = tmpDistance;
 		retWreck = w;
+		System.err.println(w.unitId);
 	    }
 	}
 
@@ -134,16 +138,17 @@ class Player {
 	int unitId;
 	int x;
 	int y;
+	int water;
 
 	public Wreck() {
 
 	}
 
-	public Wreck(int unitId, int x, int y) {
-	    super();
+	public Wreck(int unitId, int x, int y, int water) {
 	    this.unitId = unitId;
 	    this.x = x;
 	    this.y = y;
+	    this.water = water;
 	}
 
     }
