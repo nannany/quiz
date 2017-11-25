@@ -1,6 +1,8 @@
 package marathon.codingame.mean_max;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -8,8 +10,8 @@ import java.util.Scanner;
  * according to the problem statement.
  **/
 class Player {
-    static ArrayList<Wreck> wreckList;
-    static ArrayList<Tanker> tankerList;
+    static HashMap<Integer, Wreck> wreckMap;
+    static HashMap<Integer, Tanker> tankerMap;
     static ArrayList<Tar> tarList;
     static ArrayList<Oil> oilList;
     static Looter myReaper;
@@ -40,8 +42,8 @@ class Player {
 	    int enemyRage2 = in.nextInt();
 
 	    int unitCount = in.nextInt();
-	    wreckList = new ArrayList<>();
-	    tankerList = new ArrayList<>();
+	    wreckMap = new HashMap<>();
+	    tankerMap = new HashMap<>();
 	    tarList = new ArrayList<>();
 	    oilList = new ArrayList<>();
 	    for (int i = 0; i < unitCount; i++) {
@@ -87,10 +89,10 @@ class Player {
 		    // tanker
 		} else if (unitType == 3) {
 		    Tanker tanker = new Tanker(unitId, player, mass, radius, x, y, vx, vy, extra, extra2);
-		    tankerList.add(tanker);
+		    tankerMap.put(unitId, tanker);
 		} else if (unitType == 4) {
 		    Wreck wreck = new Wreck(unitId, x, y, extra);
-		    wreckList.add(wreck);
+		    wreckMap.put(unitId, wreck);
 		} else if (unitType == 5) {
 		    Tar tar = new Tar(unitId, x, y, extra);
 		    tarList.add(tar);
@@ -100,20 +102,64 @@ class Player {
 		}
 	    }
 
-	    Pos tmpPos = nearestWreckFromMyReaper(myReaper);
-	    // reaper操作
-	    throttle(tmpPos.x, tmpPos.y, 300);
+	    /**
+	     * 水持ってるtanker見つけたらreaper,destroyer同時に襲いに行く。
+	     * 水持ってるやつ見つけるまでは、reaperは水探して、destroyerはほかの邪魔しに行く。
+	     */
+	    if (!tankerMap.entrySet().stream().anyMatch(t -> t.getValue().waterCapacity == 0)) {
+		// reaper
+		Pos tmpPos = nearestWreckFromMyReaper(myReaper);
+		// 距離
+		// int tmpDistance = (int) Math.sqrt((tmpPos.x - myReaper.x) ^ 2
+		// + (tmpPos.y - myReaper.y) ^ 2);
+		throttle(tmpPos.x, tmpPos.y, 300);
+		// destroyer
+		if (enemyScore1 > enemyScore2) {
+		    throttle(enemyReaper1.x, enemyReaper1.y, 300);
+		} else {
+		    throttle(enemyReaper2.x, enemyReaper2.y, 300);
+		}
+		// 水がある場合
+	    } else if (!wreckMap.isEmpty()) {
+		// reaper
+		Pos tmpPos = nearestWreckFromMyReaper(myReaper);
+		throttle(tmpPos.x, tmpPos.y, 300);
+		int id = tankerMap.entrySet().stream().filter(t -> t.getValue().waterCapacity == 0)
+			.max((t1, t2) -> t1.getValue().water - t2.getValue().water).get().getValue().unitId;
+		throttle(tankerMap.get(id).x, tankerMap.get(id).y, 300);
+	    } else {
+		int id = tankerMap.entrySet().stream().filter(t -> t.getValue().waterCapacity == 0)
+			.max((t1, t2) -> t1.getValue().water - t2.getValue().water).get().getValue().unitId;
+		throttle(tankerMap.get(id).x, tankerMap.get(id).y, 300);
+		throttle(tankerMap.get(id).x, tankerMap.get(id).y, 300);
 
-	    // destroyer操作
-
+	    }
 
 	    // doof操作
-	    if (enemyScore1 > enemyScore2) {
-		throttle(enemyReaper1.x, enemyReaper1.y, 300);
+	    if ((getDistance(myDoof, enemyReaper1) < 1000 || getDistance(myDoof, enemyReaper2) < 1000)
+		    && getDistance(myDoof, myReaper) > 1000) {
+		if (myRage > 60) {
+		    if (getDistance(myDoof, enemyReaper1) < 1000) {
+			skill(enemyReaper1.x, enemyReaper1.y);
+		    } else {
+			skill(enemyReaper2.x, enemyReaper2.y);
+		    }
+		} else {
+		    if (enemyScore1 > enemyScore2) {
+			throttle(enemyReaper1.x, enemyReaper1.y, 300);
+		    } else {
+			throttle(enemyReaper2.x, enemyReaper2.y, 300);
+		    }
+		}
 	    } else {
-		throttle(enemyReaper2.x, enemyReaper2.y, 300);
+		if (enemyScore1 > enemyScore2) {
+		    throttle(enemyReaper1.x, enemyReaper1.y, 300);
+		} else {
+		    throttle(enemyReaper2.x, enemyReaper2.y, 300);
+		}
 	    }
 	}
+
     }
 
     /**
@@ -128,6 +174,47 @@ class Player {
     }
 
     /**
+     * SKILL実行ラッパー
+     *
+     * @param x
+     * @param y
+     */
+    private static void skill(int x, int y) {
+	System.out.println("SKILL " + x + " " + y);
+    }
+
+    /**
+     * 任意の2機の距離を返す。
+     *
+     * @param l1
+     * @param l2
+     * @return
+     */
+    private static int getDistance(Looter l1, Looter l2) {
+	if (l2.playerId == 0) {
+	    System.err.println("myReaper:" + (int) Math.sqrt(Math.pow((l1.x - l2.x), 2) + Math.pow((l1.y - l2.y), 2)));
+	} else if (l2.playerId == 1) {
+	    System.err.println("enemy1:" + (int) Math.sqrt((l1.x - l2.x) ^ 2 + (l1.y - l2.y) ^ 2));
+	} else if (l2.playerId == 2) {
+	    System.err.println("enemy2:" + (int) Math.sqrt((l1.x - l2.x) ^ 2 + (l1.y - l2.y) ^ 2));
+	}
+	return (int) Math.sqrt(Math.pow((l1.x - l2.x), 2) + Math.pow((l1.y - l2.y), 2));
+    }
+
+    /**
+     * 任意の2機の中間地点をかえす。
+     *
+     * @param l1
+     * @param l2
+     * @return
+     */
+    private static Pos getMidPos(Looter l1, Looter l2) {
+	int retX = (l1.x + l2.x) / 2;
+	int retY = (l1.y + l2.y) / 2;
+	return new Pos(retX, retY);
+    }
+
+    /**
      * 指定したReaperから一番近い位置にあるWreckのPosを返す。
      *
      * @return
@@ -135,12 +222,12 @@ class Player {
     private static Pos nearestWreckFromMyReaper(Looter reaper) {
 	Wreck retWreck = new Wreck();
 	int distance = Integer.MAX_VALUE;
-	for (Wreck w : wreckList) {
-	    int tmpDistance = Math.abs(w.x - reaper.x) + Math.abs(w.y - reaper.y);
+	for (Map.Entry<Integer, Wreck> w : wreckMap.entrySet()) {
+	    int tmpDistance = Math.abs(w.getValue().x - reaper.x) + Math.abs(w.getValue().y - reaper.y);
 	    if (tmpDistance < distance) {
 		distance = tmpDistance;
-		retWreck = w;
-		System.err.println(w.unitId);
+		retWreck = w.getValue();
+		System.err.println(w.getValue().unitId);
 	    }
 	}
 
