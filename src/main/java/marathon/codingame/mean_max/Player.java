@@ -102,38 +102,100 @@ class Player {
 		}
 	    }
 
+	    // reaperの動作決め
+	    int pointReaperTanker = -Integer.MIN_VALUE;
+	    int targetTankerId = -1;
+	    for (Map.Entry<Integer, Tanker> tankerMap : tankerMap.entrySet()) {
+		Tanker tanker = tankerMap.getValue();
+		int tmpPoint = 0;
+		// enemyReaperから遠く、myDestroyerに近いほど高ポイント;
+		int myDeDis = getDistance(myDestroyer, tanker);
+		int ene1Dis = getDistance(enemyReaper1, tanker);
+		int ene2Dis = getDistance(enemyReaper2, tanker);
+
+		tmpPoint = tanker.water * 1000 - myDeDis + (ene1Dis + ene2Dis) / 2;
+
+		if (pointReaperTanker < tmpPoint) {
+		    pointReaperTanker = tmpPoint;
+		    targetTankerId = tanker.unitId;
+		}
+	    }
+
+	    int pointReaperWreck = -Integer.MIN_VALUE;
+	    int targetWreckId = -1;
+	    for (Map.Entry<Integer, Wreck> wreckMap : wreckMap.entrySet()) {
+		Wreck wreck = wreckMap.getValue();
+		int tmpPoint = 0;
+
+		int myReDis = getDistance(myReaper, wreck);
+		int ene1Dis = getDistance(enemyReaper1, wreck);
+		int ene2Dis = getDistance(enemyReaper2, wreck);
+
+		// 間にタンカーある場合は避ける
+
+		tmpPoint = wreck.water * 2000 - myReDis + ene1Dis + ene2Dis;
+
+		if (pointReaperWreck < tmpPoint) {
+		    pointReaperWreck = tmpPoint;
+		    targetWreckId = wreck.unitId;
+		}
+	    }
+
+	    if (pointReaperTanker > pointReaperWreck) {
+		Tanker t = tankerMap.get(targetTankerId);
+		throttle(t.x, t.y, 300);
+		System.err.println(pointReaperTanker);
+	    } else {
+		Wreck w = wreckMap.get(targetWreckId);
+		throttle(w.x, w.y, 300);
+		System.err.println(pointReaperWreck);
+	    }
+	    // Reaper終了
+
+	    // destroyer開始
+	    if (enemyScore1 > enemyScore2) {
+		throttle(enemyReaper1.x, enemyReaper1.y, 300);
+	    } else {
+		throttle(enemyReaper2.x, enemyReaper2.y, 300);
+	    }
+
 	    /**
 	     * 水持ってるtanker見つけたらreaper,destroyer同時に襲いに行く。
 	     * 水持ってるやつ見つけるまでは、reaperは水探して、destroyerはほかの邪魔しに行く。
 	     */
-	    if (!tankerMap.entrySet().stream().anyMatch(t -> t.getValue().waterCapacity == 0)) {
-		// reaper
-		Pos tmpPos = nearestWreckFromMyReaper(myReaper);
-		// 距離
-		// int tmpDistance = (int) Math.sqrt((tmpPos.x - myReaper.x) ^ 2
-		// + (tmpPos.y - myReaper.y) ^ 2);
-		throttle(tmpPos.x, tmpPos.y, 300);
-		// destroyer
-		if (enemyScore1 > enemyScore2) {
-		    throttle(enemyReaper1.x, enemyReaper1.y, 300);
-		} else {
-		    throttle(enemyReaper2.x, enemyReaper2.y, 300);
-		}
-		// 水がある場合
-	    } else if (!wreckMap.isEmpty()) {
-		// reaper
-		Pos tmpPos = nearestWreckFromMyReaper(myReaper);
-		throttle(tmpPos.x, tmpPos.y, 300);
-		int id = tankerMap.entrySet().stream().filter(t -> t.getValue().waterCapacity == 0)
-			.max((t1, t2) -> t1.getValue().water - t2.getValue().water).get().getValue().unitId;
-		throttle(tankerMap.get(id).x, tankerMap.get(id).y, 300);
-	    } else {
-		int id = tankerMap.entrySet().stream().filter(t -> t.getValue().waterCapacity == 0)
-			.max((t1, t2) -> t1.getValue().water - t2.getValue().water).get().getValue().unitId;
-		throttle(tankerMap.get(id).x, tankerMap.get(id).y, 300);
-		throttle(tankerMap.get(id).x, tankerMap.get(id).y, 300);
-
-	    }
+	    // if (!tankerMap.entrySet().stream().anyMatch(t ->
+	    // t.getValue().waterCapacity == 0)) {
+	    // // reaper
+	    // Pos tmpPos = nearestWreckFromMyReaper(myReaper);
+	    // // 距離
+	    // // int tmpDistance = (int) Math.sqrt((tmpPos.x - myReaper.x) ^ 2
+	    // // + (tmpPos.y - myReaper.y) ^ 2);
+	    // throttle(tmpPos.x, tmpPos.y, 300);
+	    // // destroyer
+	    // if (enemyScore1 > enemyScore2) {
+	    // throttle(enemyReaper1.x, enemyReaper1.y, 300);
+	    // } else {
+	    // throttle(enemyReaper2.x, enemyReaper2.y, 300);
+	    // }
+	    // // 水がある場合
+	    // } else if (!wreckMap.isEmpty()) {
+	    // // reaper
+	    // Pos tmpPos = nearestWreckFromMyReaper(myReaper);
+	    // throttle(tmpPos.x, tmpPos.y, 300);
+	    // int id = tankerMap.entrySet().stream().filter(t ->
+	    // t.getValue().waterCapacity == 0)
+	    // .max((t1, t2) -> t1.getValue().water -
+	    // t2.getValue().water).get().getValue().unitId;
+	    // throttle(tankerMap.get(id).x, tankerMap.get(id).y, 300);
+	    // } else {
+	    // int id = tankerMap.entrySet().stream().filter(t ->
+	    // t.getValue().waterCapacity == 0)
+	    // .max((t1, t2) -> t1.getValue().water -
+	    // t2.getValue().water).get().getValue().unitId;
+	    // throttle(tankerMap.get(id).x, tankerMap.get(id).y, 300);
+	    // throttle(tankerMap.get(id).x, tankerMap.get(id).y, 300);
+	    //
+	    // }
 
 	    // doof操作
 	    if ((getDistance(myDoof, enemyReaper1) < 1000 || getDistance(myDoof, enemyReaper2) < 1000)
@@ -159,7 +221,6 @@ class Player {
 		}
 	    }
 	}
-
     }
 
     /**
@@ -184,6 +245,15 @@ class Player {
     }
 
     /**
+     * turnを返す。
+     *
+     * @return
+     */
+    private static int getTurn() {
+	return 1;
+    }
+
+    /**
      * 任意の2機の距離を返す。
      *
      * @param l1
@@ -199,6 +269,10 @@ class Player {
 	    System.err.println("enemy2:" + (int) Math.sqrt((l1.x - l2.x) ^ 2 + (l1.y - l2.y) ^ 2));
 	}
 	return (int) Math.sqrt(Math.pow((l1.x - l2.x), 2) + Math.pow((l1.y - l2.y), 2));
+    }
+
+    private static int getDistance(Looter l1, Wreck w1) {
+	return (int) Math.sqrt((l1.x - w1.x) * (l1.x - w1.x) + (l1.y - w1.y) * (l1.y - w1.y));
     }
 
     /**
