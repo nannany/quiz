@@ -12,11 +12,11 @@ public class Overload {
 	return Integer.toString(a + b);
     }
 
-    private static int ret(int a, double b) {
+    public static int ret(int a, double b) {
 	return a * (int) b;
     }
 
-    private static int ret(double a, int b) {
+    protected static int ret(double a, int b) {
 	return (int) a / b;
     }
 }
