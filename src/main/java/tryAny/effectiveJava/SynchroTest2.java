@@ -14,7 +14,7 @@ public class SynchroTest2 {
                 if (e == 23) {
                     ExecutorService exec = Executors.newSingleThreadExecutor();
                     try {
-                        exec.submit(() -> s.removeObserver(this)).get();
+                        exec.submit(() -> (s.removeObserver(this))).get();
                     } catch (ExecutionException | InterruptedException ex) {
                         throw new AssertionError(ex);
                     } finally {
@@ -26,5 +26,8 @@ public class SynchroTest2 {
         for (int i = 0; i < 100; i++) {
             set.add(i);
         }
+
+        // エラーは出ないがここには到達しない
+        System.out.println("finish");
     }
 }
