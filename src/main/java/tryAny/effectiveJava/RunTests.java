@@ -22,22 +22,24 @@ public class RunTests {
                     System.out.println("Invalid @Test: " + m);
                 }
             }
-
-            if (m.isAnnotationPresent(ExceptionTest.class)) {
+            // Processing repeatable annotations
+            if (m.isAnnotationPresent(ExceptionTest.class) || m.isAnnotationPresent(ExceptionTestContainer.class)) {
                 tests++;
                 try {
                     m.invoke(null);
                     System.out.printf("Test %s failed: no exception%n", m);
-                } catch (InvocationTargetException wrappedEx) {
-                    Throwable exc = wrappedEx.getCause();
-                    Class<? extends Throwable> excType = m.getAnnotation(ExceptionTest.class).value();
-                    if (excType.isInstance(exc)) {
-                        passed++;
-                    } else {
-                        System.out.printf("Test %s failed: expected %s, got %s%n", m, excType.getName(), exc);
+                } catch (Throwable wrappedExc) {
+                    Throwable exc = wrappedExc.getCause();
+                    int oldPassed = passed;
+                    ExceptionTest[] excTests = m.getAnnotationsByType(ExceptionTest.class);
+                    for (ExceptionTest excTest : excTests) {
+                        if (excTest.value().isInstance(exc)) {
+                            passed++;
+                            break;
+                        }
                     }
-                } catch (Exception exc) {
-                    System.out.println("Invalid @Test: " + m);
+                    if (passed == oldPassed)
+                        System.out.printf("Test %s failed: %s %n", m, exc);
                 }
             }
 
