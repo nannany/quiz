@@ -3,10 +3,9 @@ package tryAny.effectiveJava;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.time.Period;
 
 public class BogusPeriod {
-    // Byte stream could not have come from real Period instance!
+    // Byte stream could not have come from real Period instance
     private static final byte[] serializedForm = new byte[] { (byte) 0xac, (byte) 0xed, 0x00, 0x05, 0x73, 0x72, 0x00,
             0x06, 0x50, 0x65, 0x72, 0x69, 0x6f, 0x64, 0x40, 0x7e, (byte) 0xf8, 0x2b, 0x4f, 0x46, (byte) 0xc0,
             (byte) 0xf4, 0x02, 0x00, 0x02, 0x4c, 0x00, 0x03, 0x65, 0x6e, 0x64, 0x74, 0x00, 0x10, 0x4c, 0x6a, 0x61, 0x76,
@@ -22,13 +21,14 @@ public class BogusPeriod {
     }
 
     // Returns the object with the specified serialized form
-    private static Object deserialize(byte[] sf) {
+    public static Object deserialize(byte[] sf) {
         try {
             InputStream is = new ByteArrayInputStream(sf);
             ObjectInputStream ois = new ObjectInputStream(is);
             return ois.readObject();
         } catch (Exception e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException(e.toString());
         }
     }
+
 }
